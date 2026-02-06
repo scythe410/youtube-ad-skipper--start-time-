@@ -2,7 +2,63 @@
 let skipSeconds = 7;
 let targetChannels = [];
 let isEnabled = true;
+let isEnabled = true;
 let isInitialized = false;
+
+// Inject styles for the notification
+const style = document.createElement('style');
+style.textContent = `
+  .yt-skipper-toast {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-family: Roboto, Arial, sans-serif;
+    font-size: 14px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .yt-skipper-toast.show {
+    opacity: 1;
+  }
+`;
+document.head.appendChild(style);
+
+// Function to show notification
+function showNotification(message) {
+  const videoContainer = document.querySelector('.html5-video-player') || document.body;
+  
+  // Remove existing toast if any
+  const existingToast = document.querySelector('.yt-skipper-toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const toast = document.createElement('div');
+  toast.className = 'yt-skipper-toast';
+  toast.textContent = message;
+  
+  videoContainer.appendChild(toast);
+  
+  // Trigger reflow to ensure transition works
+  void toast.offsetWidth;
+  
+  toast.classList.add('show');
+  
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 3000);
+}
 
 // Load settings from storage
 chrome.storage.sync.get(['skipSeconds', 'targetChannels', 'isEnabled'], function(result) {
@@ -228,6 +284,9 @@ function skipVideo() {
     video.currentTime = skipSeconds;
     video.setAttribute('data-skipped', 'true');
     console.log(`YouTube Video Skipper: SUCCESS! Skipped to ${skipSeconds} seconds for channel: ${currentChannelId}`);
+    
+    // Show visual feedback
+    showNotification(`Skipped intro (${skipSeconds}s)`);
     
     // Remove the skipped attribute after a delay to allow for manual seeking
     setTimeout(() => {

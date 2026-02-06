@@ -8,11 +8,11 @@
     "storage"
   ],
   "host_permissions": [
-    "https://www.youtube.com/*"
+    "*://*.youtube.com/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
+      "matches": ["*://*.youtube.com/*"],
       "js": ["content.js"],
       "run_at": "document_end"
     }
